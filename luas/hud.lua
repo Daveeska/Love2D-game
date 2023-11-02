@@ -1,47 +1,16 @@
-world = require('luas.world')
-love.graphics.setDefaultFilter("nearest", "nearest")
-
-local function debugItem(text, x, y, value)
-    return {
-        text = text,
-        x=x,
-        y=y,
-        value=value
-    }
-end
-
-local function invGui(sprite, x, y)
-    return {
-        sprite=sprite,
-        x=x,
-        y=y,
-        draw = function()
-            love.graphics.draw(sprite, x, y, nil, 4)
-        end
-    }
-end
-
 component = {
     actionButton = {
         sprite = love.graphics.newImage("res/sprites/ui/E.png"),
-        x=22,
-        y=720
+        x=love.graphics.getWidth()/2-(32*4)/2,
+        y=750
     },
 
     sugarCount = invGui(love.graphics.newImage("res/sprites/ui/SugarCount.png"), 1230, 750),
     eggCount = invGui(love.graphics.newImage("res/sprites/ui/EggCount.png"), 1430, 750),
+    chcookiesCount = invGui(love.graphics.newImage("res/sprites/ui/chCookieCount.png"), 20, 750),
 
     --Debugging
     debug = {
-        isRenderingDebugHUD = false,
-        fps=debugItem("FPS: ", 0,0, 0),
-        pos=debugItem("Pos(x,y):       ,", 0,20,{x=0,y=0}),
-        current_animation=debugItem("Current Frame: ",0,40,0),
-        cam_scale=debugItem("Camera Scale: ", 0,60,1),
-        sugar_count=debugItem("Total Sugar: ", 0,80,0),
-        near_collectables=debugItem("Is Colliding With Collectable: ", 0,100,false),
-        invsugar=debugItem("Inv.Sugar: ", 0, 120,0),
-        invegg=debugItem("Inv.egg: ", 0, 140,0)
     }
     --isColliding = false
 }
@@ -59,12 +28,14 @@ function component.update(self, player, cam, world)
     --Sugar Count
     self.debug.sugar_count.value = #world.sugars
 
-    --Is Near Sugar
+    --Is Near X
     self.debug.near_collectables.value = player.isCollidingWCollectable
+    self.debug.near_factoryarea.value = player.isCollidingWChocolateMakingArea
 
     --Inventory
     self.debug.invsugar.value = player.inventory.sugars
     self.debug.invegg.value = player.inventory.eggs
+    self.debug.invchcookies.value = player.inventory.chcookies
 end
 
 function component.draw(self)
@@ -76,7 +47,7 @@ function component.draw(self)
 
     --Texts
     if self.debug.near_collectables.value then
-        love.graphics.draw(self.actionButton.sprite, self.actionButton.x, self.actionButton.y, nil, 5)
+        love.graphics.draw(self.actionButton.sprite, self.actionButton.x, self.actionButton.y, nil, 4)
     end
 
     --Sugar Count
@@ -85,8 +56,18 @@ function component.draw(self)
 
     --Egg Count
     self.eggCount:draw()
-    love.graphics.print(self.debug.invegg.value, 896+550,836, nil, 2)
+    love.graphics.print(self.debug.invegg.value, 1446,836, nil, 2)
 
+    --Chocolates Cookies Counts
+    self.chcookiesCount:draw()
+    love.graphics.print(self.debug.invchcookies.value, 36,838, nil, 2)
+
+end
+
+function component:activateDebug(key)
+    if key == "f3" then
+        self.debug.isRenderingDebugHUD = not self.debug.isRenderingDebugHUD
+    end
 end
 
 function component:drawDebug()
@@ -120,11 +101,16 @@ function component:drawDebug()
     love.graphics.print(self.debug.sugar_count.value, self.debug.sugar_count.x+180,
     self.debug.sugar_count.y, nil, 2)
 
-    --Near Sugar
+    --Near X
     love.graphics.print(self.debug.near_collectables.text, self.debug.near_collectables.x,
     self.debug.near_collectables.y, nil, 2)
     love.graphics.print(tostring(self.debug.near_collectables.value), self.debug.near_collectables.x+350,
     self.debug.near_collectables.y, nil, 2)
+
+    love.graphics.print(self.debug.near_factoryarea.text, self.debug.near_factoryarea.x,
+    self.debug.near_factoryarea.y, nil, 2)
+    love.graphics.print(tostring(self.debug.near_factoryarea.value), self.debug.near_factoryarea.x+220,
+    self.debug.near_factoryarea.y, nil, 2)
 
     --Inventory
     --Sugar

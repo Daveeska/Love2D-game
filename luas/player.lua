@@ -1,11 +1,8 @@
 local anim8 = require("luas.libraries.anim8.anim8")
+local pLib = require("luas.physics")
 local world = require("luas.world")
-local lphysics = require("luas.lphysics")
-local chocolatecookies = require("luas.foods.ChocoCookies")
 
-love.graphics.setDefaultFilter("nearest", "nearest")
-
-Player = {
+local player = {
     x=0,
     y=0,
 
@@ -19,50 +16,58 @@ Player = {
     animations = {},
     inventory = {
         sugars = 0,
-        eggs = 0
+        eggs = 0,
+        chcookies = 0
     },
+    hitbox = require("luas.player.hitbox"),
+    camera = require("luas.player.camera"),
 
     --Debug Information
-    isCollidingWCollectable=false
+    isCollidingWCollectable=false,
+    isCollidingWChocolateMakingArea=false
 }
 
 --Animations
-Player.spriteSheet = love.graphics.newImage('res/sprites/player-sheet.png');
-Player.grid = anim8.newGrid(15,30,Player.spriteSheet:getDimensions())
+player.spriteSheet = love.graphics.newImage('res/sprites/player-sheet.png');
+player.grid = anim8.newGrid(15,30,player.spriteSheet:getDimensions())
 
-Player.time_between_frames = 0.13
+player.time_between_frames = 0.13
 
-Player.animations.down = {
-    anim= anim8.newAnimation(Player.grid('1-5', 1), Player.time_between_frames),
+player.animations.down = {
+    anim= anim8.newAnimation(player.grid('1-5', 1), player.time_between_frames),
     name="down"
 }
 
-Player.animations.left = {
-    anim=anim8.newAnimation(Player.grid('1-3', 2), Player.time_between_frames),
+player.animations.left = {
+    anim=anim8.newAnimation(player.grid('1-3', 2), player.time_between_frames),
     name="left"
 }
-Player.animations.up = {
-    anim=anim8.newAnimation(Player.grid('1-5', 3), Player.time_between_frames),
+player.animations.up = {
+    anim=anim8.newAnimation(player.grid('1-5', 3), player.time_between_frames),
     name="up"
 }
-Player.animations.right = {
-    anim=anim8.newAnimation(Player.grid('1-3', 4), Player.time_between_frames),
+player.animations.right = {
+    anim=anim8.newAnimation(player.grid('1-3', 4), player.time_between_frames),
     name="right"
 }
 
-Player.current_animation = Player.animations.left
+player.current_animation = player.animations.left
 
 --Collider
-Player.collider = pWorld:newBSGRectangleCollider(14,460,Player.width,Player.height,5)
-Player.collider:setFixedRotation(true)
+player.collider = pLib.newBSGRecCollider(14,460,player.width,player.height,5)
+player.collider:setFixedRotation(true)
 
-function Player:update(dt)
+function player:update(dt)
     self:control(dt)
     self:animate(dt)
     self:collide()
 
+    --Hitbox
+    self.hitbox:update(dt,self)
+
     self.x = self.collider:getX()-4
     self.y = self.collider:getY()-24
+
 end
 
 local function index(t, val)
@@ -75,43 +80,47 @@ local function index(t, val)
   return nil
 end
 
-
-function Player:collide()
+function player:collide()
     self.isCollidingWCollectable=false
+    self.isCollidingWChocolateMakingArea=false
+
     --Sugars
-    for _,obj in ipairs(rWorld.sugars) do
-        if collideWith(self, obj) then
+    for _,obj in ipairs(world.sugars) do
+        if pLib.collideWith(self, obj) then
             self.isCollidingWCollectable=true
             self:take(obj, "sugars")
         end
     end
     --Eggs
-    for _,obj in ipairs(rWorld.eggs) do
-        if collideWith(self, obj) then
+    for _,obj in ipairs(world.eggs) do
+        if pLib.collideWith(self, obj) then
             self.isCollidingWCollectable=true
             self:take(obj, "eggs")
         end
     end
-    --[[
-    if collideWith(self, rWorld.Maps.ca.layers["ChocolateArea"].objects[1]) then
-        if key=="E" then
-            self:makeChocolate()
+    if pLib.collideWith(self, world.Maps.ca.layers["ChocolateArea"].objects[1]) then
+        self.isCollidingWChocolateMakingArea=true
+    end
+end
+
+function player:makeChocolate(key)
+    if key=="e" and self.isCollidingWChocolateMakingArea then
+        if self.inventory.sugars >=10 and self.inventory.sugars >=4 then
+            self.inventory.sugars = self.inventory.sugars - 10
+            self.inventory.eggs = self.inventory.eggs - 4
+            self.inventory.chcookies = self.inventory.chcookies + 1
         end
     end
-    --]]
 end
 
-function Player:makeChocolate()
-end
-
-function Player:take(obj, item)
+function player:take(obj, item)
     if love.keyboard.isDown("e") then
         self.inventory[item] = self.inventory[item] + 1
-        table.remove(rWorld[item], index(rWorld[item], obj))
+        table.remove(world[item], index(world[item], obj))
     end
 end
 
-function Player.animate(self, dt)
+function player.animate(self, dt)
     local isMoving=false
 
     if love.keyboard.isDown("w") then
@@ -165,7 +174,7 @@ local function normalize(vector)
     return vector
 end
 
-function Player.control(self, dt)
+function player.control(self, dt)
     local inputX = bool_to_number(love.keyboard.isDown("d")) - bool_to_number(love.keyboard.isDown("a"))
     local vx = inputX * self.speed * dt
     local inputY = bool_to_number(love.keyboard.isDown("w")) - bool_to_number(love.keyboard.isDown("s"))
@@ -176,6 +185,8 @@ function Player.control(self, dt)
     self.collider:setLinearVelocity(normalizedVector[1] * self.speed, normalizedVector[2] * self.speed)
 end
 
-function Player.draw(self)
+function player.draw(self)
     self.current_animation.anim:draw(self.spriteSheet, self.x, self.y, nil, self.scale, nil, 6, 9)
 end
+
+return player

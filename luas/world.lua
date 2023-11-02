@@ -1,21 +1,15 @@
-wf = require('luas/libraries/windfield')
-pWorld = wf.newWorld(0, 0)
-sti = require('luas.libraries/sti')
+--Tiled functionality
+local sti = require('luas.libraries/sti')
 
 --Collectables
-sgr = require('luas.Collectables.sugar')
-egg = require('luas.Collectables.egg')
+require('luas.Collectables.sugar')
+require('luas.Collectables.egg')
 
-function pWorld.updateall(dt)
-    pWorld:update(dt)
-end
+local pLib = require('luas.physics')
+local UI = require('luas.UI')
 
-function pWorld.drawall()
-    pWorld:draw()
-end
-
---rWorld System
-rWorld = {
+--world System
+local world = {
     --bg=love.graphics.newImage('res/sprites/background.png');
     Maps = {
         ca = sti('res/maps/world.lua'),
@@ -26,47 +20,67 @@ rWorld = {
     eggs = {}
 }
 
-if rWorld.Maps.ca.layers["CollectableArea"] and rWorld.Maps.ca.layers["CollectableArea"].objects then
-    for i, obj in pairs(rWorld.Maps.ca.layers["CollectableArea"].objects) do
-        local probability = math.random(4)
-        if probability == 1 then
-            local sugar = newSugar(obj.x, obj.y)
-            table.insert(rWorld.sugars, sugar)
-        end
-        if probability == 2 then
-            local egg = newEgg(obj.x, obj.y)
-            table.insert(rWorld.eggs, egg)
+function world:reSpawnCollectables()
+    if world.Maps.ca.layers["CollectableArea"] and world.Maps.ca.layers["CollectableArea"].objects then
+        for i, obj in pairs(world.Maps.ca.layers["CollectableArea"].objects) do
+            local probability = math.random(4)
+            if probability == 1 then
+                local sugar = newSugar(obj.x, obj.y)
+                table.insert(world.sugars, sugar)
+            end
+            if probability == 2 then
+                local egg = newEgg(obj.x, obj.y)
+                table.insert(world.eggs, egg)
+            end
         end
     end
 end
 
-if rWorld.Maps.ca.layers["cWalls"] and rWorld.Maps.ca.layers["cWalls"].objects then
-    for i, obj in pairs(rWorld.Maps.ca.layers["cWalls"].objects) do
-        local wall = pWorld:newRectangleCollider(obj.x, obj.y, obj.width, obj.height)
-        wall:setType('static')
-        table.insert(rWorld.walls, wall)
+
+function world:load()
+    world:reSpawnCollectables()
+
+    if world.Maps.ca.layers["cWalls"] and world.Maps.ca.layers["cWalls"].objects then
+        for i, obj in pairs(world.Maps.ca.layers["cWalls"].objects) do
+            local wall = pLib.newRecCollider(obj.x, obj.y, obj.width, obj.height)
+            wall:setType('static')
+            table.insert(world.walls, wall)
+        end
     end
 end
 
-function rWorld:update(dt)
-    pWorld:update(dt)
+local timer=0
+function world:update(dt)
+    if #self.sugars <= 5 or #self.eggs <= 3 then
+        timer=timer+dt
+        if timer>=8.5 then
+            self:reSpawnCollectables()
+        end
+    end
 end
 
-function rWorld:draw()
-    rWorld.Maps.ca:drawLayer(rWorld.Maps.ca.layers["Ground"])
-    rWorld.Maps.ca:drawLayer(rWorld.Maps.ca.layers["Paths"])
-    for _, obj in ipairs(rWorld.sugars) do
+function drawCollectablesCollider()
+    for _, obj in ipairs(world.sugars) do
         obj:draw()
-        if component.debug.isRenderingDebugHUD then
+        if UI.isDebugging then
             love.graphics.rectangle("line", obj.x, obj.y, obj.width, obj.height)
         end
     end
-    for _, obj in ipairs(rWorld.eggs) do
+    for _, obj in ipairs(world.eggs) do
         obj:draw()
-        if component.debug.isRenderingDebugHUD then
+        if UI.isDebugging then
             love.graphics.rectangle("line", obj.x, obj.y, obj.width, obj.height)
         end
     end
-    rWorld.Maps.ca:drawLayer(rWorld.Maps.ca.layers["Floor"])
-    rWorld.Maps.ca:drawLayer(rWorld.Maps.ca.layers["Walls"])
 end
+
+function world:draw()
+    world.Maps.ca:drawLayer(world.Maps.ca.layers["Ground"])
+    world.Maps.ca:drawLayer(world.Maps.ca.layers["Paths"])
+    world.Maps.ca:drawLayer(world.Maps.ca.layers["Floor"])
+    world.Maps.ca:drawLayer(world.Maps.ca.layers["Walls"])
+    drawCollectablesCollider()
+
+end
+
+return world

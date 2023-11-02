@@ -4,12 +4,12 @@ function newSugar(x,y)
         x=x,
         y=y,
 
-        height = 33,
-        width = 37,
+        height = 33*.7,
+        width = 27*.7,
 
         id = 0,
         draw = function (self)
-            love.graphics.draw(self.sprite, self.x, self.y)
+            love.graphics.draw(self.sprite, self.x, self.y, nil, .7)
         end,
     }
 end
