@@ -1,9 +1,9 @@
---Tiled functionality
-local sti = require('luas.libraries/sti')
-
 --Collectables
 require('luas.Collectables.sugar')
 require('luas.Collectables.egg')
+
+--Tiled functionality
+local sti = require('luas.libraries/sti')
 
 local pLib = require('luas.physics')
 local UI = require('luas.UI')
@@ -15,9 +15,10 @@ local world = {
         ca = sti('res/maps/world.lua'),
     },
     walls = {},
+    sWalls = {},
 
     sugars = {},
-    eggs = {}
+    eggs = {},
 }
 
 function world:reSpawnCollectables()
@@ -44,7 +45,9 @@ function world:load()
         for i, obj in pairs(world.Maps.ca.layers["cWalls"].objects) do
             local wall = pLib.newRecCollider(obj.x, obj.y, obj.width, obj.height)
             wall:setType('static')
-            table.insert(world.walls, wall)
+            table.insert(self.walls, wall)
+            local box={x=obj.x, y=obj.y, width=obj.width, height=obj.height}
+            table.insert(self.sWalls, boxToPolygon(box))
         end
     end
 end
@@ -59,7 +62,7 @@ function world:update(dt)
     end
 end
 
-function drawCollectablesCollider()
+function world:drawCollectablesCollider()
     for _, obj in ipairs(world.sugars) do
         obj:draw()
         if UI.isDebugging then
@@ -79,8 +82,8 @@ function world:draw()
     world.Maps.ca:drawLayer(world.Maps.ca.layers["Paths"])
     world.Maps.ca:drawLayer(world.Maps.ca.layers["Floor"])
     world.Maps.ca:drawLayer(world.Maps.ca.layers["Walls"])
-    drawCollectablesCollider()
 
+    self:drawCollectablesCollider()
 end
 
 return world

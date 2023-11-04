@@ -8,5 +8,3 @@ function invGui(sprite, x, y)
         end
     }
 end
-
-

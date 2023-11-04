@@ -2,6 +2,8 @@ local anim8 = require("luas.libraries.anim8.anim8")
 local pLib = require("luas.physics")
 local world = require("luas.world")
 
+require("globalfunc")
+
 local player = {
     x=0,
     y=0,
@@ -19,6 +21,7 @@ local player = {
         eggs = 0,
         chcookies = 0
     },
+
     hitbox = require("luas.player.hitbox"),
     camera = require("luas.player.camera"),
 
@@ -28,7 +31,7 @@ local player = {
 }
 
 --Animations
-player.spriteSheet = love.graphics.newImage('res/sprites/player-sheet.png');
+player.spriteSheet = loadpurpleimg("res/sprites/player-sheet.png")
 player.grid = anim8.newGrid(15,30,player.spriteSheet:getDimensions())
 
 player.time_between_frames = 0.13
@@ -57,10 +60,27 @@ player.current_animation = player.animations.left
 player.collider = pLib.newBSGRecCollider(14,460,player.width,player.height,5)
 player.collider:setFixedRotation(true)
 
+--Shadows
+local box = {
+    x=player.x,
+    y=player.y,
+    width=player.width,
+    height=player.height
+}
+
+function box:update()
+    box.x,box.y=player.x,player.y
+    player.shadow = boxToPolygon(box)
+end
+
+player.shadow = boxToPolygon(box)
+
 function player:update(dt)
     self:control(dt)
     self:animate(dt)
     self:collide()
+
+    box:update()
 
     --Hitbox
     self.hitbox:update(dt,self)
@@ -186,7 +206,7 @@ function player.control(self, dt)
 end
 
 function player.draw(self)
-    self.current_animation.anim:draw(self.spriteSheet, self.x, self.y, nil, self.scale, nil, 6, 9)
+    --self.current_animation.anim:draw(self.spriteSheet, self.x, self.y, nil, self.scale, nil, 6, 9)
 end
 
 return player

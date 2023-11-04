@@ -16,7 +16,9 @@ function UI:update()
 end
 
 function UI:draw()
-    self.debugVar:draw()
+    if self.isDebugging then
+        self.debugVar:draw()
+    end
 end
 
 return UI

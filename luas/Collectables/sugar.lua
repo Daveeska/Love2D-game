@@ -1,6 +1,6 @@
 function newSugar(x,y)
     return {
-        sprite = love.graphics.newImage("res/sprites/Sugar.png"),
+        sprite = loadpurpleimg("res/sprites/Sugar.png"),
         x=x,
         y=y,
 
