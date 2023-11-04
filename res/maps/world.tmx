@@ -38,7 +38,7 @@
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 </data>
  </layer>
- <layer id="3" name="Paths" width="40" height="25">
+ <layer id="3" name="Paths" width="40" height="25" visible="0">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -67,7 +67,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="5" name="Floor" width="40" height="25">
+ <layer id="5" name="Floor" width="40" height="25" visible="0">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -96,7 +96,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="2" name="Walls" width="40" height="25">
+ <layer id="2" name="Walls" width="40" height="25" visible="0">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -144,10 +144,10 @@
   <object id="178" x="968" y="672" width="24" height="4"/>
   <object id="179" x="960" y="576" width="8" height="20"/>
  </objectgroup>
- <objectgroup id="9" name="ChocolateArea">
+ <objectgroup id="9" name="ChocolateArea" visible="0">
   <object id="180" x="896" y="608" width="64" height="64"/>
  </objectgroup>
- <objectgroup id="7" name="CollectableArea">
+ <objectgroup id="7" name="CollectableArea" visible="0">
   <object id="7" x="800" y="192" width="32" height="32"/>
   <object id="8" x="832" y="192" width="32" height="32"/>
   <object id="9" x="864" y="192" width="32" height="32"/>

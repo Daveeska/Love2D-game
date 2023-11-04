@@ -1,17 +1,21 @@
 math.randomseed(os.time())
-require("luas.player")
+
+love.graphics.setDefaultFilter("nearest", "nearest")
+
+local player = require("luas.player")
+local world = require('luas.world')
+local UI = require('luas.UI')
+local pLib = require('luas.physics')
+local cam = require('luas.player.camera')
+local shadows = require('luas.shadows')
 
 function love.load()
-    camera = require('luas.libraries.camera')
-    cam = camera()
-    cam.scale = 2.3
-
-    require('luas.world')
-    require('luas.hud')
+    world:load()
+    shadows:load()
 end
 
 function love.wheelmoved(x, y)
-    if component.debug.isRenderingDebugHUD == true then
+    if UI.debugVar.isRenderingDebugHUD == true then
         if y > 0 then
             cam.scale = cam.scale + 0.1
         elseif y < 0 then
@@ -21,52 +25,38 @@ function love.wheelmoved(x, y)
 end
 
 function love.keypressed(key)
-    if key == "f3" and component.debug.isRenderingDebugHUD == false then
-        component.debug.isRenderingDebugHUD = true
-    elseif key == "f3" and component.debug.isRenderingDebugHUD == true then
-        component.debug.isRenderingDebugHUD = false
-    end
+    UI:activateDebug(key)
+    player:makeChocolate(key)
 end
 
 function love.update(dt)
-    Player:update(dt)
-    rWorld:update(dt)
+    player:update(dt)
+    world:update(dt)
 
-    --Camera system
-    cam:lookAt(Player.x, Player.y)
+    shadows:update()
 
-    local w = love.graphics.getWidth()
-    local h = love.graphics.getHeight()
+    cam:update()
 
-    if cam.x < w / 2 / cam.scale then
-        cam.x = w / 2 / cam.scale
-    end
+    pLib.updateCollider(dt)
 
-    if cam.y < h / 2 / cam.scale then
-        cam.y = h / 2 / cam.scale
-    end
-
-    local mapW = rWorld.Maps.ca.width * rWorld.Maps.ca.tilewidth
-    local mapH = rWorld.Maps.ca.height * rWorld.Maps.ca.tileheight
-
-    if cam.x > (mapW - w / 2 / cam.scale) then
-        cam.x = (mapW - w / 2 / cam.scale)
-    end
-
-    if cam.y > (mapH - h / 2 / cam.scale) then
-        cam.y = (mapH - h / 2 / cam.scale)
-    end
-
-    component:update(Player, cam, rWorld)
+    UI:update()
 end
 
 function love.draw()
+    shadows.lighter:addPolygon(player.shadow)
     cam:attach()
-    rWorld:draw()
-    Player:draw()
-    if component.debug.isRenderingDebugHUD == true then
-        pWorld:draw()
-    end
+        world:draw()
+        player:draw()
+
+        shadows:drawLights()
+        shadows.lighter:drawLights()
+
+        if UI.isDebugging then
+            pLib.drawCollider()
+        end
+
     cam:detach()
-    component:draw()
+
+    UI:draw()
+    shadows.lighter:removePolygon(player.shadow)
 end

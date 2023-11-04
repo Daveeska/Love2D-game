@@ -6,7 +6,8 @@ local shadows = {
     lightCanvas = love.graphics.newCanvas(love.graphics.getDimensions())
 }
 
-shadows.light = shadows.lighter:addLight(500,500, 10000, 1, 1, 1)
+shadows.worldLight = shadows.lighter:addLight(0, 0, 3000, 0.43, 0.482, 0.223, 1)
+--shadows.r1light = shadows.lighter:addLight(0, 0, 300, 1, 1, 1)
 
 
 function shadows:load()
@@ -15,27 +16,25 @@ function shadows:load()
     end
 end
 
--- Call after your light positions have been updated
+-- Call after your worldLight positions have been updated
 function shadows:preDrawLights()
-  love.graphics.setCanvas({ self.lightCanvas, stencil = true})
-  love.graphics.clear(0.4, 0.4, 0.4) -- Global illumination level
-  shadows.lighter:drawLights()
-  love.graphics.setCanvas()
+    love.graphics.setCanvas({ self.lightCanvas, stencil = true })
+    love.graphics.clear(0.4, 0.4, 0.4) -- Global illumination level
+    self.lighter:drawLights()
+    love.graphics.setCanvas()
 end
 
 -- Call after you have drawn your scene (but before UI)
 function shadows:drawLights()
-  love.graphics.setBlendMode("multiply", "premultiplied")
-  love.graphics.draw(self.lightCanvas)
-  love.graphics.setBlendMode("alpha")
+    love.graphics.setBlendMode("multiply", "premultiplied")
+    love.graphics.draw(self.lightCanvas)
+    love.graphics.setBlendMode("alpha")
 end
 
 function shadows:update()
+    self.lighter:updateLight(self.worldLight, 0, 0)
+    --self.r1light:updateLight(self.r1light, 4, 450)
     self:preDrawLights()
-
-    local lX, lY = 100,100
-    self.lighter:updateLight(self.light, lX, lY)
-
 end
 
 return shadows
